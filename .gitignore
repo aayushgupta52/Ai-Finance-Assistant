@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment / secrets — NEVER commit real .env
+.env
+.env.*
+!.env.example
+**/.env
+!**/.env.example
+
+# Build output
+dist/
+build/
+dist-ssr/
+
+# Prisma local dev database (SQLite)
+*.db
+**/prisma/dev.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# WhatsApp (Baileys) session — contains login credentials
+auth_info_baileys/
+**/auth_info_baileys/
+
+# User uploads
+uploads/
+**/uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Claude project instructions / local config
+claude.md
+CLAUDE.md
+.claude/
