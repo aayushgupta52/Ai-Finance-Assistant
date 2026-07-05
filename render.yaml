@@ -36,7 +36,21 @@ services:
       # Set these yourself in the Render dashboard (sync:false = not in git):
       - key: GROQ_API_KEY
         sync: false
+      # Frontend origin — set to your Vercel URL, e.g. https://your-app.vercel.app
       - key: FRONTEND_URL
+        sync: false
+      # Google OAuth. CALLBACK_URL must go through the Vercel proxy so the
+      # refresh cookie lands on the frontend domain:
+      #   https://your-app.vercel.app/api/auth/google/callback
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      # Optional — leave blank to disable that feature (app still boots):
+      #   CLOUDINARY_* (falls back to local uploads), SMTP_* (emails logged)
+      - key: ADMIN_SECRET_KEY
         sync: false
       # WhatsApp needs a persistent disk + terminal — keep off on Render free.
       - key: WHATSAPP_ENABLED
