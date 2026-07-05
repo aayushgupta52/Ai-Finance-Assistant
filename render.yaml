@@ -32,7 +32,7 @@ services:
       - key: JWT_REFRESH_EXPIRY
         value: 7d
       - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
       # Set these yourself in the Render dashboard (sync:false = not in git):
       - key: GROQ_API_KEY
         sync: false
