@@ -58,18 +58,39 @@ export default function QuickCapture({ onAdded }) {
     const rec = new SpeechRecognition();
     rec.lang = 'en-IN'; // Indian English; also copes with Hinglish numbers
     rec.interimResults = false;
+    rec.continuous = false;
     rec.maxAlternatives = 1;
     rec.onresult = (e) => {
       const transcript = e.results[0][0].transcript;
       setText(transcript);
       parse(transcript);
     };
-    rec.onerror = (e) =>
-      setError(e.error === 'no-speech' ? 'Didn’t catch that — try again.' : `Mic error: ${e.error}`);
+    rec.onerror = (e) => {
+      setListening(false);
+      // Mobile browsers report permission/https issues with these codes.
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        setError('Mic blocked. Allow microphone access for this site in your browser settings, then retry.');
+      } else if (e.error === 'no-speech') {
+        setError('Didn’t catch that — try again.');
+      } else if (e.error === 'aborted') {
+        setError('');
+      } else if (e.error === 'network') {
+        setError('Voice needs an internet connection. Check your network and retry.');
+      } else {
+        setError(`Mic error: ${e.error}`);
+      }
+    };
     rec.onend = () => setListening(false);
     recRef.current = rec;
     setListening(true);
-    rec.start();
+    // rec.start() can throw synchronously on mobile (InvalidStateError if a prior
+    // session didn't fully stop). Guard it so the button never dead-ends.
+    try {
+      rec.start();
+    } catch {
+      setListening(false);
+      setError('Could not start the mic. Close other apps using it and try again.');
+    }
   };
 
   const stopVoice = () => recRef.current?.stop();
@@ -146,7 +167,8 @@ export default function QuickCapture({ onAdded }) {
           </div>
         ) : (
           <p className="text-sm text-slate-500">
-            Voice input needs Chrome or Edge. Use “Paste SMS” or the form below instead.
+            Voice isn’t available in this browser. On mobile, open the site in Chrome
+            (not an in-app browser), or use “📩 Paste SMS” / the form below to add expenses.
           </p>
         ))}
 
