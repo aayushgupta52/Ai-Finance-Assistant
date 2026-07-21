@@ -16,6 +16,7 @@ import {
   deleteExpense,
   expenseSummary,
   expenseTrends,
+  financeOverview,
 } from '../controllers/expense.controller.js';
 
 const router = Router();
@@ -24,6 +25,7 @@ const router = Router();
 router.use(authenticateJWT);
 
 // Aggregations come before the :id routes so they aren't captured as ids.
+router.get('/overview', validate(summaryQuerySchema, 'query'), financeOverview);
 router.get('/summary', validate(summaryQuerySchema, 'query'), expenseSummary);
 router.get('/trends', expenseTrends);
 

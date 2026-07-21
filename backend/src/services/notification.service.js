@@ -6,7 +6,6 @@ export const NOTIFICATION_TYPES = [
   'budget_alert',
   'subscription',
   'report',
-  'goal',
   'tax',
   'fraud',
   'system',

@@ -5,6 +5,7 @@ import { api, authApi } from './services/api.js';
 import { useThemeStore } from './store/theme.js';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import Onboarding from './pages/Onboarding.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -15,7 +16,6 @@ const Insights = lazy(() => import('./pages/Insights.jsx'));
 const Chat = lazy(() => import('./pages/Chat.jsx'));
 const Upload = lazy(() => import('./pages/Upload.jsx'));
 const Budgets = lazy(() => import('./pages/Budgets.jsx'));
-const Goals = lazy(() => import('./pages/Goals.jsx'));
 const Split = lazy(() => import('./pages/Split.jsx'));
 const Subscriptions = lazy(() => import('./pages/Subscriptions.jsx'));
 const Tax = lazy(() => import('./pages/Tax.jsx'));
@@ -91,6 +91,14 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           element={
             <ProtectedRoute>
               <Layout />
@@ -99,7 +107,6 @@ export default function App() {
         >
           <Route path="/" element={<Dashboard />} />
           <Route path="/budgets" element={<Budgets />} />
-          <Route path="/goals" element={<Goals />} />
           <Route path="/split" element={<Split />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/tax" element={<Tax />} />

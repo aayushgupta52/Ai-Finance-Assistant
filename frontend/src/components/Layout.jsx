@@ -23,7 +23,6 @@ const drawerLink = ({ isActive }) =>
 const LINKS = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/budgets', label: 'Budgets' },
-  { to: '/goals', label: 'Goals' },
   { to: '/split', label: 'Split' },
   { to: '/subscriptions', label: 'Subs' },
   { to: '/tax', label: 'Tax' },

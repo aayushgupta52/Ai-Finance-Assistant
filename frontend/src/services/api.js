@@ -65,6 +65,7 @@ export const authApi = {
   register: (body) => unwrap(api.post('/auth/register', body)),
   login: (body) => unwrap(api.post('/auth/login', body)),
   me: () => unwrap(api.get('/auth/me')),
+  updateProfile: (body) => unwrap(api.patch('/auth/profile', body)),
   logout: () => api.post('/auth/logout'),
 };
 
@@ -73,6 +74,7 @@ export const expenseApi = {
   create: (body) => unwrap(api.post('/expenses', body)),
   update: (id, body) => unwrap(api.put(`/expenses/${id}`, body)),
   remove: (id) => unwrap(api.delete(`/expenses/${id}`)),
+  overview: (params) => unwrap(api.get('/expenses/overview', { params })),
   summary: (params) => unwrap(api.get('/expenses/summary', { params })),
   trends: () => unwrap(api.get('/expenses/trends')),
 };
@@ -89,14 +91,6 @@ export const budgetApi = {
   create: (body) => unwrap(api.post('/budgets', body)),
   update: (id, body) => unwrap(api.put(`/budgets/${id}`, body)),
   remove: (id) => unwrap(api.delete(`/budgets/${id}`)),
-};
-
-export const goalApi = {
-  list: () => unwrap(api.get('/goals')),
-  create: (body) => unwrap(api.post('/goals', body)),
-  update: (id, body) => unwrap(api.put(`/goals/${id}`, body)),
-  addProgress: (id, amount) => unwrap(api.put(`/goals/${id}/progress`, { amount })),
-  remove: (id) => unwrap(api.delete(`/goals/${id}`)),
 };
 
 export const subscriptionApi = {

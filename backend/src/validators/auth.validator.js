@@ -22,3 +22,10 @@ export const loginSchema = Joi.object({
 export const refreshSchema = Joi.object({
   refreshToken: Joi.string().optional(), // may also arrive via httpOnly cookie
 });
+
+export const updateProfileSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(80),
+  monthlyIncome: Joi.number().positive().max(1_000_000_000).precision(2),
+  taxRegime: Joi.string().valid('old', 'new'),
+  annualIncome: Joi.number().positive().max(1_000_000_000).precision(2),
+}).min(1);

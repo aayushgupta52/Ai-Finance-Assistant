@@ -28,6 +28,7 @@ model User {
   financialYear String   @default("2024-25")
   taxRegime     String   @default("new") // "old" | "new"
   annualIncome  Float?
+  monthlyIncome Float? // primary metric — app is gated until this is set
   role          String   @default("user") // "user" | "admin"
   isPro         Boolean  @default(false)
   createdAt     DateTime @default(now())
@@ -37,7 +38,6 @@ model User {
   incomes       Income[]
   subscriptions Subscription[]
   budgets       Budget[]
-  goals         Goal[]
   documents     Document[]
   notifications Notification[]
   auditLogs     AuditLog[]
@@ -121,24 +121,6 @@ model Budget {
   @@index([userId, year, month])
 }
 
-model Goal {
-  id             String   @id @default(cuid())
-  userId         String
-  name           String
-  targetAmount   Float
-  savedAmount    Float    @default(0)
-  targetDate     DateTime
-  category       String // Emergency Fund, Vacation, Gadget, etc.
-  monthlyTarget  Float? // AI-calculated recommended monthly saving
-  sipRecommended Float? // AI-suggested SIP amount
-  isCompleted    Boolean  @default(false)
-  createdAt      DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
 model Document {
   id                String    @id @default(cuid())
   userId            String
@@ -161,7 +143,7 @@ model Notification {
   userId    String
   title     String
   message   String
-  type      String // "budget_alert" | "subscription" | "report" | "goal" | "tax"
+  type      String // "budget_alert" | "subscription" | "report" | "tax"
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 

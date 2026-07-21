@@ -11,7 +11,7 @@ const MONTH_NAMES = [
 const inr = (n) => `Rs ${Math.round(n || 0).toLocaleString('en-IN')}`;
 
 // Assembles everything a monthly report needs: totals, category breakdown,
-// income by source, budget adherence, and goal progress.
+// income by source, and budget adherence.
 export const getMonthlyReportData = async (userId, { year, month } = {}) => {
   const now = new Date();
   const y = year ?? now.getUTCFullYear();
@@ -19,7 +19,7 @@ export const getMonthlyReportData = async (userId, { year, month } = {}) => {
   const { start, end } = monthBounds(y, m);
   const dateRange = { gte: start, lt: end };
 
-  const [user, summary, incomes, budgets, goals, topExpenses] = await Promise.all([
+  const [user, summary, incomes, budgets, topExpenses] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, email: true },
@@ -31,7 +31,6 @@ export const getMonthlyReportData = async (userId, { year, month } = {}) => {
       _sum: { amount: true },
     }),
     prisma.budget.findMany({ where: { userId, month: m, year: y } }),
-    prisma.goal.findMany({ where: { userId } }),
     prisma.expense.findMany({
       where: { userId, date: dateRange },
       orderBy: { amount: 'desc' },
@@ -71,12 +70,6 @@ export const getMonthlyReportData = async (userId, { year, month } = {}) => {
     byCategory: summary.byCategory,
     incomeBySource: incomes.map((i) => ({ source: i.source, total: i._sum.amount ?? 0 })),
     budgetStatus,
-    goals: goals.map((g) => ({
-      name: g.name,
-      targetAmount: g.targetAmount,
-      savedAmount: g.savedAmount,
-      progress: g.targetAmount > 0 ? g.savedAmount / g.targetAmount : 0,
-    })),
     topExpenses,
   };
 };

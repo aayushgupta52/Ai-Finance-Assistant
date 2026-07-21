@@ -2,6 +2,7 @@ import { prisma } from '../config/prisma.js';
 import { ok, created, asyncHandler, ApiError } from '../utils/response.js';
 import { writeAuditLog } from '../middleware/audit.js';
 import { serializeExpenseInput, parseExpense } from '../utils/serialize.js';
+import { getMonthlySummary } from '../services/analytics.service.js';
 
 // Builds the Prisma `where` clause for a user's expenses from query filters.
 const buildWhere = (userId, { category, startDate, endDate, search }) => {
@@ -104,6 +105,35 @@ export const deleteExpense = asyncHandler(async (req, res) => {
     resourceId: req.params.id,
   });
   return ok(res, null, 'Expense deleted');
+});
+
+// GET /api/expenses/overview?month&year
+// The core dashboard payload: income, expenses, remaining balance, savings,
+// savings rate, and category breakdown — all derived from the user's declared
+// monthly income. This is the single call the redesigned dashboard depends on.
+export const financeOverview = asyncHandler(async (req, res) => {
+  const summary = await getMonthlySummary(req.user.id, req.query);
+
+  const spendRatio = summary.income > 0 ? summary.expenseTotal / summary.income : 0;
+  // Simple, deterministic health signal (the AI verdict lives on /ai/insights).
+  let health = 'healthy';
+  if (summary.income === 0) health = 'unknown';
+  else if (spendRatio > 1) health = 'overspending';
+  else if (spendRatio > 0.8) health = 'tight';
+
+  return ok(res, {
+    month: summary.month,
+    year: summary.year,
+    income: summary.income,
+    expenseTotal: summary.expenseTotal,
+    remainingBalance: summary.remainingBalance,
+    savings: summary.savings,
+    savingsRate: summary.savingsRate,
+    transactionCount: summary.transactionCount,
+    subscriptions: summary.subscriptions,
+    byCategory: summary.byCategory,
+    health,
+  });
 });
 
 // GET /api/expenses/summary?month&year

@@ -140,3 +140,20 @@ export const me = asyncHandler(async (req, res) => {
   if (!user) throw new ApiError(404, 'User not found');
   return ok(res, { user: publicUser(user) });
 });
+
+// PATCH /api/auth/profile — update editable profile fields (currently the
+// mandatory monthlyIncome, plus optional name/taxRegime/annualIncome).
+export const updateProfile = asyncHandler(async (req, res) => {
+  const { name, monthlyIncome, taxRegime, annualIncome } = req.body;
+
+  const data = {};
+  if (name !== undefined) data.name = name;
+  if (monthlyIncome !== undefined) data.monthlyIncome = monthlyIncome;
+  if (taxRegime !== undefined) data.taxRegime = taxRegime;
+  if (annualIncome !== undefined) data.annualIncome = annualIncome;
+
+  const user = await prisma.user.update({ where: { id: req.user.id }, data });
+  writeAuditLog({ req, action: 'profile.update', resource: 'user', resourceId: user.id });
+
+  return ok(res, { user: publicUser(user) }, 'Profile updated');
+});

@@ -7,7 +7,9 @@ export const monthBounds = (year, month) => ({
 });
 
 // Aggregates a user's finances for one month into a compact object that the AI
-// prompts and health-score logic both consume.
+// prompts, dashboard, and health-score logic all consume. The app is built
+// around the user's declared monthly income (User.monthlyIncome) — the single
+// source of truth for remaining balance and savings rate.
 export const getMonthlySummary = async (userId, { year, month } = {}) => {
   const now = new Date();
   const y = year ?? now.getUTCFullYear();
@@ -15,14 +17,14 @@ export const getMonthlySummary = async (userId, { year, month } = {}) => {
   const { start, end } = monthBounds(y, m);
   const dateRange = { gte: start, lt: end };
 
-  const [grouped, incomeAgg, expenseAgg, subsTotal, goals] = await Promise.all([
+  const [grouped, user, expenseAgg, subsTotal] = await Promise.all([
     prisma.expense.groupBy({
       by: ['category'],
       where: { userId, date: dateRange },
       _sum: { amount: true },
       _count: { _all: true },
     }),
-    prisma.income.aggregate({ where: { userId, date: dateRange }, _sum: { amount: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { monthlyIncome: true } }),
     prisma.expense.aggregate({
       where: { userId, date: dateRange },
       _sum: { amount: true },
@@ -31,10 +33,6 @@ export const getMonthlySummary = async (userId, { year, month } = {}) => {
     prisma.expense.aggregate({
       where: { userId, date: dateRange, category: 'Subscription' },
       _sum: { amount: true },
-    }),
-    prisma.goal.findMany({
-      where: { userId, isCompleted: false },
-      select: { name: true, targetAmount: true, savedAmount: true },
     }),
   ]);
 
@@ -46,21 +44,23 @@ export const getMonthlySummary = async (userId, { year, month } = {}) => {
     }))
     .sort((a, b) => b.total - a.total);
 
-  const income = incomeAgg._sum.amount ?? 0;
+  const income = user?.monthlyIncome ?? 0;
   const expenseTotal = expenseAgg._sum.amount ?? 0;
   const subscriptions = subsTotal._sum.amount ?? 0;
+  const remainingBalance = income - expenseTotal;
 
   return {
     year: y,
     month: m,
     income,
     expenseTotal,
+    remainingBalance,
+    savings: remainingBalance > 0 ? remainingBalance : 0,
     transactionCount: expenseAgg._count._all,
     subscriptions,
-    savingsRate: income > 0 ? (income - expenseTotal) / income : 0,
+    savingsRate: income > 0 ? remainingBalance / income : 0,
     byCategory,
     topCategories: byCategory.slice(0, 5).map((c) => c.category),
-    goals: goals.map((g) => g.name),
   };
 };
 

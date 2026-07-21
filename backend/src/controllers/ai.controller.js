@@ -95,8 +95,10 @@ export const chat = asyncHandler(async (req, res) => {
   const systemPrompt = buildChatSystemPrompt({
     name: user?.name,
     monthlyIncome: summary.income,
+    expenseTotal: summary.expenseTotal,
+    remainingBalance: summary.remainingBalance,
+    savingsRate: summary.savingsRate,
     topCategories: summary.topCategories,
-    goals: summary.goals,
   });
 
   res.setHeader('Content-Type', 'text/event-stream');

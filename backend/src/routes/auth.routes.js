@@ -8,6 +8,7 @@ import {
   registerSchema,
   loginSchema,
   refreshSchema,
+  updateProfileSchema,
 } from '../validators/auth.validator.js';
 import {
   register,
@@ -16,6 +17,7 @@ import {
   refresh,
   logout,
   me,
+  updateProfile,
 } from '../controllers/auth.controller.js';
 
 const router = Router();
@@ -44,5 +46,6 @@ router.post('/logout', logout);
 
 // Current user
 router.get('/me', authenticateJWT, me);
+router.patch('/profile', authenticateJWT, validate(updateProfileSchema), updateProfile);
 
 export default router;

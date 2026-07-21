@@ -53,7 +53,6 @@ export const getUser = asyncHandler(async (req, res) => {
           expenses: true,
           incomes: true,
           budgets: true,
-          goals: true,
           subscriptions: true,
           documents: true,
         },
